@@ -11,21 +11,37 @@ document.addEventListener("DOMContentLoaded", function () {
         square.classList.add("black");
       }
 
-      // Add number to the square
       const number = document.createElement("div");
       number.classList.add("number");
       number.textContent = (7 - i) * 8 + j + 1;
       square.appendChild(number);
 
+      square.dataset.row = 7 - i;
+      square.dataset.col = j;
+
       board.appendChild(square);
     }
   }
 
-  const knightPosition = 56;
-  const knightSquare = board.children[knightPosition];
-  knightSquare.classList.add("knight");
+  function getIndexFromCoordinates(row, col) {
+    return (7 - row) * 8 + col;
+  }
 
-  console.log("Number of moves: ", knightMoves([0, 0], [, 5]));
+  const knightPosition = [4, 4];
+  const index = getIndexFromCoordinates(knightPosition[0], knightPosition[1]);
+  const knightSquare = board.children[index];
+  knightSquare.classList.add("knight");
+});
+
+document.addEventListener("click", (event) => {
+  const square = event.target.closest(".square");
+  if (square) {
+    const row = parseInt(square.dataset.row, 10);
+    const col = parseInt(square.dataset.col, 10);
+
+    console.log("row(y) : ", row);
+    console.log("col(x) : ", col);
+  }
 });
 
 function knightMoves(start, target) {
