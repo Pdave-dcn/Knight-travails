@@ -23,11 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function getIndexFromCoordinates(row, col) {
-    return (7 - row) * 8 + col;
-  }
-
-  const knightPosition = [4, 4];
+  const knightPosition = [0, 0];
   const index = getIndexFromCoordinates(knightPosition[0], knightPosition[1]);
   const knightSquare = board.children[index];
   knightSquare.classList.add("knight");
@@ -36,13 +32,62 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("click", (event) => {
   const square = event.target.closest(".square");
   if (square) {
-    const row = parseInt(square.dataset.row, 10);
-    const col = parseInt(square.dataset.col, 10);
+    const [x, y] = getKnightPosition();
+    const startPos = [x, y];
 
-    console.log("row(y) : ", row);
-    console.log("col(x) : ", col);
+    const rowY = parseInt(square.dataset.row, 10);
+    const colX = parseInt(square.dataset.col, 10);
+    const targetPos = [colX, rowY];
+
+    const path = knightMoves(startPos, targetPos);
+    if (path && path.length > 0) {
+      animateKnightMovement(path);
+    } else {
+      console.log("No valid path");
+    }
   }
 });
+
+function animateKnightMovement(path) {
+  const board = document.getElementById("chessboard");
+  if (!board) return console.log("Board don't exist");
+  let index = 0;
+
+  const moveStep = () => {
+    if (index < path.length) {
+      document.querySelector(".knight").classList.remove("knight");
+
+      const [col, row] = path[index];
+      const squareIndex = getIndexFromCoordinates(row, col);
+
+      const knightSquare = board.children[squareIndex];
+      knightSquare.classList.add("knight");
+
+      index++;
+      setTimeout(moveStep, 500);
+    }
+  };
+
+  moveStep();
+}
+
+function getIndexFromCoordinates(row, col) {
+  return (7 - row) * 8 + col;
+}
+
+function getKnightPosition() {
+  const knight = document.querySelector(".knight");
+
+  if (!knight) {
+    return console.log("Knight don't exist");
+  }
+
+  const row = parseInt(knight.dataset.row, 10);
+  const col = parseInt(knight.dataset.col, 10);
+  const coordinates = [col, row];
+
+  return coordinates;
+}
 
 function knightMoves(start, target) {
   const directions = [
@@ -61,15 +106,16 @@ function knightMoves(start, target) {
   };
 
   const queue = [];
-  queue.push([...start, 0]);
+  queue.push([...start, 0, []]);
 
   const visited = new Set();
   visited.add(start.toString());
 
   while (queue.length > 0) {
-    const [x, y, numberOfMoves] = queue.shift();
+    const [x, y, numberOfMoves, path] = queue.shift();
+    const currentPath = [...path, [x, y]];
 
-    if (x === target[0] && y === target[1]) return numberOfMoves;
+    if (x === target[0] && y === target[1]) return currentPath;
 
     for (const [dx, dy] of directions) {
       const newX = x + dx;
@@ -78,9 +124,9 @@ function knightMoves(start, target) {
 
       if (isValid(newX, newY) && !visited.has(newPosition.toString())) {
         visited.add(newPosition.toString());
-        queue.push([newX, newY, numberOfMoves + 1]);
+        queue.push([newX, newY, numberOfMoves + 1, currentPath]);
       }
     }
   }
-  return null;
+  return [];
 }
