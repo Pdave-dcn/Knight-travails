@@ -6,6 +6,15 @@ body {
   background-color: cadetblue;
 }
 
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 #chessboard {
   display: grid;
   grid-template-columns: repeat(8, 75px);
@@ -44,4 +53,9 @@ body {
   left: 2px;
   font-size: 12px;
   color: cadetblue;
+}
+
+.trace {
+  background-color: rgba(255, 0, 0, 0.5);
+  animation: fadeOut 1s forwards;
 }

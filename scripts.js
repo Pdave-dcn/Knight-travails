@@ -42,19 +42,31 @@ document.addEventListener("click", (event) => {
     const path = knightMoves(startPos, targetPos);
     if (path && path.length > 0) {
       animateKnightMovement(path);
-    } else {
-      console.log("No valid path");
     }
   }
 });
 
+/**
+ * Animates the movement of a knight chess piece along a given path on the chessboard.
+ * @param {Array<Array<number>>} path - An array of coordinates representing the path for the knight to move.
+ * @returns None
+ */
 function animateKnightMovement(path) {
   const board = document.getElementById("chessboard");
-  if (!board) return console.log("Board don't exist");
+  if (!board) return;
   let index = 0;
 
   const moveStep = () => {
     if (index < path.length) {
+      if (index > 0) {
+        const [prevCol, prevRow] = path[index - 1];
+        const prevSquareIndex = getIndexFromCoordinates(prevRow, prevCol);
+        const prevSquare = board.children[prevSquareIndex];
+        prevSquare.classList.add("trace");
+
+        setTimeout(() => prevSquare.classList.remove("trace"), 1000);
+      }
+
       document.querySelector(".knight").classList.remove("knight");
 
       const [col, row] = path[index];
@@ -75,11 +87,15 @@ function getIndexFromCoordinates(row, col) {
   return (7 - row) * 8 + col;
 }
 
+/**
+ * Retrieves the position of the knight on the chessboard.
+ * @returns {number[]} An array containing the column and row coordinates of the knight.
+ */
 function getKnightPosition() {
   const knight = document.querySelector(".knight");
 
   if (!knight) {
-    return console.log("Knight don't exist");
+    return;
   }
 
   const row = parseInt(knight.dataset.row, 10);
@@ -89,6 +105,12 @@ function getKnightPosition() {
   return coordinates;
 }
 
+/**
+ * Finds the shortest path for a knight on a chessboard from a start position to a target position.
+ * @param {number[]} start - The starting position [x, y] on the chessboard.
+ * @param {number[]} target - The target position [x, y] on the chessboard.
+ * @returns {number[][]} The shortest path from start to target as an array of positions.
+ */
 function knightMoves(start, target) {
   const directions = [
     [2, 1],
@@ -106,13 +128,13 @@ function knightMoves(start, target) {
   };
 
   const queue = [];
-  queue.push([...start, 0, []]);
+  queue.push([...start, []]);
 
   const visited = new Set();
   visited.add(start.toString());
 
   while (queue.length > 0) {
-    const [x, y, numberOfMoves, path] = queue.shift();
+    const [x, y, path] = queue.shift();
     const currentPath = [...path, [x, y]];
 
     if (x === target[0] && y === target[1]) return currentPath;
@@ -124,7 +146,7 @@ function knightMoves(start, target) {
 
       if (isValid(newX, newY) && !visited.has(newPosition.toString())) {
         visited.add(newPosition.toString());
-        queue.push([newX, newY, numberOfMoves + 1, currentPath]);
+        queue.push([newX, newY, currentPath]);
       }
     }
   }
